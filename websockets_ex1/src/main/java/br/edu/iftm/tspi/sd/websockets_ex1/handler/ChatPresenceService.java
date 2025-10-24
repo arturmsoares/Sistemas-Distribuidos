@@ -13,72 +13,64 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class ChatPresenceService {
 
-    // (sessionId -> username) Mapa para rastrear sessões
+    // para para rastrar as seções para os usuários
     private final Map<String, String> sessaoParaUsuario = new ConcurrentHashMap<>();
     
-    // (username) Set para a lista pública de usuários
+    // set para a lista ública de usuários online
     private final Set<String> usuariosOnline = Collections.synchronizedSet(new HashSet<>());
 
+    
     private final SimpMessagingTemplate messagingTemplate;
 
     public ChatPresenceService(SimpMessagingTemplate messagingTemplate) {
         this.messagingTemplate = messagingTemplate;
     }
 
-    /**
-     * Chamado quando um usuário se conecta (via Interceptor).
-     */
-    public void adicionarUsuario(String sessionId, String username) {
-        if (username == null) return;
-        
-        sessaoParaUsuario.put(sessionId, username);
+    //chamado quando um usuário se conecta
+    public void adicionarUsuario(String sesssionId, String username){
+        if(username==null) return;
+
+
+        //acrescenta no MAP de determinada sessão o usuário
+        sessaoParaUsuario.put(sesssionId, username);
+        //acrescenta um nome no SET de usuários online
         usuariosOnline.add(username);
 
-        // Notifica o /topic/online
+        //para notificar o /topic/online
         enviarListaUsuariosOnline();
-        
-        // Notifica o /topic/public
+
+        //para notificar o /topic/public
         Mensagem msg = new Mensagem(TipoMensagem.ENTRAR, username, null, username + " entrou", Instant.now());
         messagingTemplate.convertAndSend("/topic/public", msg);
     }
 
-    /**
-     * Chamado quando um usuário desconecta limpa (via Interceptor).
-     */
-    public void removerUsuarioPorNome(String username) {
-        if (username == null) return;
+    public void removerUsuarioPorNome(String username){
+        if(username == null) return;
 
-        // Encontra o sessionId pelo username
-        String sessionId = null;
-        for (Map.Entry<String, String> entry : sessaoParaUsuario.entrySet()) {
-            if (entry.getValue().equals(username)) {
+        String sessionId= null;
+        for(Map.Entry<String, String> entry : sessaoParaUsuario.entrySet()){
+            if(entry.getValue().equals(username)){
                 sessionId = entry.getKey();
                 break;
             }
         }
-        
-        if (sessionId != null) {
+
+        if (sessionId != null){
             sessaoParaUsuario.remove(sessionId);
         }
         usuariosOnline.remove(username);
 
-        // Notifica todos
-        enviarListaUsuariosOnline();
         Mensagem msg = new Mensagem(TipoMensagem.SAIR, username, null, username + " saiu", Instant.now());
         messagingTemplate.convertAndSend("/topic/public", msg);
+        
     }
 
-    /**
-     * Chamado quando uma sessão é desconectada (via EventListener).
-     * @return O nome do usuário que foi removido.
-     */
-    public String removerUsuarioPorSessao(String sessionId) {
+    public String removerUsuarioPorSessao (String sessionId){
         String username = sessaoParaUsuario.remove(sessionId);
-        
-        if (username != null) {
+
+        if (username != null){
             usuariosOnline.remove(username);
-            
-            // Notifica todos
+
             enviarListaUsuariosOnline();
             Mensagem msg = new Mensagem(TipoMensagem.SAIR, username, null, username + " saiu", Instant.now());
             messagingTemplate.convertAndSend("/topic/public", msg);
@@ -87,6 +79,8 @@ public class ChatPresenceService {
     }
 
     private void enviarListaUsuariosOnline() {
-        messagingTemplate.convertAndSend("/topic/online", usuariosOnline);
+        messagingTemplate.convertAndSend("/topic/presenca", usuariosOnline);
     }
+
+    
 }
