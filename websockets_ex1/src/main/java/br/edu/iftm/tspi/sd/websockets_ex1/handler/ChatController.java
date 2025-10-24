@@ -35,6 +35,7 @@ public class ChatController {
 
         usuariosOnline.add(mensagem.getOrigem());
         messagingTemplate.convertAndSend("/topic/online", usuariosOnline);
+        // Atualiza a lista de usuários online para todos os clientes
 
         mensagem.setTipoMensagem(TipoMensagem.ENTRAR);
         mensagem.setDataHora(Instant.now());
