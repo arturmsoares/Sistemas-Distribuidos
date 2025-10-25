@@ -140,6 +140,12 @@
                 const users = JSON.parse(frame.body);
                 updateOnlineUsers(users);
             });
+          
+          // O @SubscribeMapping no servidor responderá a esta inscrição
+            stomp.subscribe("/app/online", (frame) => {
+                const users = JSON.parse(frame.body);
+                updateOnlineUsers(users);
+            });
             
 
             stomp.send("/app/chat.join", {}, JSON.stringify({ origem: user }));

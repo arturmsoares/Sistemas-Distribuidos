@@ -1,5 +1,6 @@
 package br.edu.iftm.tspi.sd.websockets_ex1.handler;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +23,7 @@ public class ChatPresenceService {
     
     private final SimpMessagingTemplate messagingTemplate;
 
-    public ChatPresenceService(SimpMessagingTemplate messagingTemplate) {
+    public ChatPresenceService(@Lazy SimpMessagingTemplate messagingTemplate) {
         this.messagingTemplate = messagingTemplate;
     }
 
@@ -81,6 +82,8 @@ public class ChatPresenceService {
     private void enviarListaUsuariosOnline() {
         messagingTemplate.convertAndSend("/topic/presenca", usuariosOnline);
     }
+
+    
 
     
 }
