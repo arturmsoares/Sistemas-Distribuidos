@@ -21,28 +21,16 @@ public class ChatPresenceService {
     private final Set<String> usuariosOnline = Collections.synchronizedSet(new HashSet<>());
 
     
-    private final SimpMessagingTemplate messagingTemplate;
 
-    public ChatPresenceService(@Lazy SimpMessagingTemplate messagingTemplate) {
-        this.messagingTemplate = messagingTemplate;
-    }
+    public ChatPresenceService(){}
 
     //chamado quando um usuário se conecta
     public void adicionarUsuario(String sesssionId, String username){
         if(username==null) return;
-
-
         //acrescenta no MAP de determinada sessão o usuário
         sessaoParaUsuario.put(sesssionId, username);
         //acrescenta um nome no SET de usuários online
         usuariosOnline.add(username);
-
-        //para notificar o /topic/online
-        enviarListaUsuariosOnline();
-
-        //para notificar o /topic/public
-        Mensagem msg = new Mensagem(TipoMensagem.ENTRAR, username, null, username + " entrou", Instant.now());
-        messagingTemplate.convertAndSend("/topic/public", msg);
     }
 
     public void removerUsuarioPorNome(String username){
@@ -59,11 +47,7 @@ public class ChatPresenceService {
         if (sessionId != null){
             sessaoParaUsuario.remove(sessionId);
         }
-        usuariosOnline.remove(username);
-
-        Mensagem msg = new Mensagem(TipoMensagem.SAIR, username, null, username + " saiu", Instant.now());
-        messagingTemplate.convertAndSend("/topic/public", msg);
-        
+        usuariosOnline.remove(username);        
     }
 
     public String removerUsuarioPorSessao (String sessionId){
@@ -71,19 +55,11 @@ public class ChatPresenceService {
 
         if (username != null){
             usuariosOnline.remove(username);
-
-            enviarListaUsuariosOnline();
-            Mensagem msg = new Mensagem(TipoMensagem.SAIR, username, null, username + " saiu", Instant.now());
-            messagingTemplate.convertAndSend("/topic/public", msg);
         }
         return username;
     }
 
-    private void enviarListaUsuariosOnline() {
-        messagingTemplate.convertAndSend("/topic/presenca", usuariosOnline);
-    }
-
-    
-
-    
+    public Set<String> getUsuariosOnline(){
+        return usuariosOnline;
+    }   
 }
