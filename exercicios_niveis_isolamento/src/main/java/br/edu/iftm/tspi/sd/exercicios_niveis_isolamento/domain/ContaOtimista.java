@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name="tb_conta_pessimista")
+@Table(name="tb_conta_otimista")
 @Getter
 @Setter
 @NoArgsConstructor

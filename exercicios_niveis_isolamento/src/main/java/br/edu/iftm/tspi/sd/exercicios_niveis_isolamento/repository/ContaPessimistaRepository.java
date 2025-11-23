@@ -10,7 +10,7 @@ import jakarta.persistence.LockModeType;
 
 public interface ContaPessimistaRepository extends JpaRepository<ContaPessimista, String> {
     
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Lock(LockModeType.PESSIMISTIC_WRITE) //ponto chave para o bloqueio pessimista
     @Query("SELECT c FROM ContaPessimista c WHERE c.numero = :numero")
     ContaPessimista findByNumeroWithLock(@Param("numero") String numero);
 }
